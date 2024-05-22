@@ -78,6 +78,8 @@
       "dashboard": "Dashboard",
       "profile": "Profile",
       "blank": "Blank",
+      "Category": "Category",
+      "Products": "Products",
       "mainMenu": "Main Menu",
       "subMenu": "Sub Menu"
     }

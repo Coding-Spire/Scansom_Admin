@@ -40,6 +40,7 @@ const MenuItem = ({ menuItem }: { menuItem: IMenuItem }) => {
     }
   };
 
+  
   useEffect(() => {
     if (location) {
       calculateIsActive(location);

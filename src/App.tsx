@@ -23,6 +23,7 @@ import { setCurrentUser } from './store/reducers/auth';
 import { firebaseAuth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useAppDispatch, useAppSelector } from './store/store';
+import Category from './pages/Category';
 
 const { VITE_NODE_ENV } = import.meta.env;
 
@@ -93,6 +94,7 @@ const App = () => {
             <Route path="/sub-menu-2" element={<Blank />} />
             <Route path="/sub-menu-1" element={<SubMenu />} />
             <Route path="/blank" element={<Blank />} />
+            <Route path="/Category" element={<Category />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/" element={<Dashboard />} />
           </Route>

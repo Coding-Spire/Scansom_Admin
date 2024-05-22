@@ -24,6 +24,17 @@ export const MENU: IMenuItem[] = [
     icon: 'fas fa-wrench nav-icon',
     path: '/blank',
   },
+
+  {
+    name: i18n.t('menusidebar.label.Category'),
+    icon: 'fas fa-wrench nav-icon',
+    path: '/Category',
+  },
+  {
+    name: i18n.t('menusidebar.label.Products'),
+    icon: 'fas fa-wrench nav-icon',
+    path: '/Products',
+  },
   {
     name: i18n.t('menusidebar.label.mainMenu'),
     icon: 'far fa-caret-square-down nav-icon',
