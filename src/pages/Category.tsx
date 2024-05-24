@@ -1,9 +1,10 @@
 // Import statements
-import { apiService } from '@app/services/apiService';
-import { ContentHeader } from '@components';
-import { useEffect, useState } from 'react';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { apiService } from "@app/services/apiService";
+import { ContentHeader } from "@components";
+import { useEffect, useState } from "react";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import {
   Badge,
   Button,
@@ -12,9 +13,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Modal, 
-  ModalHeader, 
-  ModalBody, 
+  Modal,
+  ModalHeader,
+  ModalBody,
   ModalFooter,
   Col,
   Form,
@@ -26,13 +27,17 @@ import {
   FormGroup,
   Label,
   Alert,
-} from 'reactstrap';
+} from "reactstrap";
 
+import { Spinner,CustomInput } from "reactstrap";
 // Define the data structure
 interface Category {
   name: string;
-  description: string;     
+  description: string;
   categoryId: string;
+  status:boolean;
+  featureCategory: boolean;
+
 }
 
 const Category = () => {
@@ -42,6 +47,15 @@ const Category = () => {
   const [modal, setModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertColor, setAlertColor] = useState("");
+  // State for controlling the visibility of the spinner
+  const [loading, setLoading] = useState(true);
+
+  const [statusSwitch, setStatusSwitch] = useState(false);
+const [featureCategorySwitch, setFeatureCategorySwitch] = useState(false);
+const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+//to enable edit 
+const [isEditMode, setIsEditMode] = useState(false);
 
   // Function to toggle the modal
   const toggle = () => setModal(!modal);
@@ -58,6 +72,51 @@ const Category = () => {
     );
   }
 
+
+  // Function to update a category
+  function updateCategory() {
+
+  const name = (document.getElementById("categoryName") as HTMLInputElement)
+      .value;
+    const description = (
+      document.getElementById("categoryDescription") as HTMLInputElement
+    ).value;
+    const status = (document.getElementById("statusSwitch") as HTMLInputElement)
+      .checked;
+    const featureCategory = (
+      document.getElementById("featureCategorySwitch") as HTMLInputElement
+    ).checked;
+    const categoryId = (document.getElementById("categoryId") as HTMLInputElement)
+      .value;
+
+    const newCategory: Category = {
+      categoryId: categoryId,
+      name: name,
+      description: description,
+      status: status,
+      featureCategory: featureCategory,
+    };
+
+    apiService({
+      method: "PUT",
+      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
+      data: newCategory,
+    })
+      .then((response) => {
+        console.log(response.data); // Log the data
+        setAlertMessage("Category Updated successfully!");
+        setAlertColor("info");
+        toggle(); // Close the modal
+        setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
+        setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
+      })
+      .catch((error) => {
+        console.error(error);
+        setAlertMessage("An error occurred while creating the category.");
+        setAlertColor("danger");
+      });
+  }
+
   // Function to create a category
   function createCategory() {
     const name = (document.getElementById("categoryName") as HTMLInputElement)
@@ -65,11 +124,18 @@ const Category = () => {
     const description = (
       document.getElementById("categoryDescription") as HTMLInputElement
     ).value;
+    const status = (document.getElementById("statusSwitch") as HTMLInputElement)
+      .checked;
+    const featureCategory = (
+      document.getElementById("featureCategorySwitch") as HTMLInputElement
+    ).checked;
 
     const newCategory: Category = {
       categoryId: generateGUID(),
       name: name,
       description: description,
+      status: status,
+      featureCategory: featureCategory,
     };
 
     apiService({
@@ -94,6 +160,7 @@ const Category = () => {
 
   // Fetch data from the API
   useEffect(() => {
+    setLoading(true); // Show the spinner
     apiService({
       method: "GET",
       url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
@@ -101,33 +168,46 @@ const Category = () => {
       .then((response) => {
         console.log(response.data); // Log the data
         setCategories(response.data.data);
+        setLoading(false); // Hide the spinner
       })
       .catch((error) => console.error(error));
   }, [refreshKey]);
-
 
   // Function to delete a category
 
   function handleDelete(categoryId: string) {
     console.log(categoryId);
     apiService({
-      method: 'DELETE',
+      method: "DELETE",
       url: `https://sacnsommasterdataservice.azurewebsites.net/api/Category/${categoryId}`,
     })
-    .then(response => {
-      console.log(response.data); // Log the data
-      setAlertMessage("Category deleted successfully!");
-      setAlertColor("info");
-      setRefreshKey(oldKey => oldKey + 1); // Trigger a refresh
-      setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
-    })
-    .catch(error => {
-      console.error(error);
-      setAlertMessage("An error occurred while deleting the category.");
-      setAlertColor("danger");
-    });
+      .then((response) => {
+        console.log(response.data); // Log the data
+        setAlertMessage("Category deleted successfully!");
+        setAlertColor("info");
+        setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
+        setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
+      })
+      .catch((error) => {
+        console.error(error);
+        setAlertMessage("An error occurred while deleting the category.");
+        setAlertColor("danger");
+      });
     // Here you can call the API to delete the category
     // After successful deletion, you can refresh the categories list
+  }
+
+  function handleEdit(categoryId: string) {
+    const category = categories.find((category) => category.categoryId === categoryId);
+    
+    if (category) {
+      setSelectedCategory(category);
+      console.log(category);
+      setModal(true); // Open the modal
+      setIsEditMode(true); // Enter edit mode
+    } else {
+      console.log(`Category with id ${categoryId} not found.`);
+    }
   }
 
   return (
@@ -151,32 +231,73 @@ const Category = () => {
             </CardHeader>
 
             <CardBody className="p-0">
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((category, index) => (
-                    <tr key={index}>
-                      <td>{category.name}</td>
-                      <td>{category.description}</td>
-                      <td>
-                        <Badge tag="span" color="success">
-                          Active
-                        </Badge>
-                      </td>
-                      <td>
-                      <FontAwesomeIcon icon={faTrash}  style={{ color: 'red' }} onClick={() => handleDelete(category.categoryId)} />
-        </td>
+              {loading ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "50vh",
+                  }}
+                >
+                  <Spinner color="info">Loading...</Spinner>
+                </div>
+              ) : (
+                <Table responsive>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Status</th>
+                      <th>Feature Category</th>
+                      <th>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {categories.map((category, index) => (
+                      <tr key={index}>
+                        <td>{category.name}</td>
+                        <td>{category.description}</td>
+                        <td>
+                          {category.status ? (
+                            <Badge tag="span" color="success">
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge tag="span" color="danger">
+                              Inactive
+                            </Badge>
+                          )}
+                        </td>
+                        <td>
+                          {category.featureCategory ? (
+                            <Badge tag="span" color="success">
+                              Yes
+                            </Badge>
+                          ) : (
+                            <Badge tag="span" color="danger">
+                              No
+                            </Badge>
+                          )}
+                        </td>
+                        <td>
+                          <FontAwesomeIcon
+                            icon={faEdit}
+                            style={{ color: "blue", marginRight: "10px" }}
+                            onClick={() => handleEdit(category.categoryId)}
+                          />{" "}
+                          | &nbsp;
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            style={{ color: "red" }}
+                            onClick={() => handleDelete(category.categoryId)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
             </CardBody>
           </Card>
         </div>
@@ -193,6 +314,7 @@ const Category = () => {
                 name="categoryName"
                 placeholder="Name"
                 type="text"
+                value={selectedCategory ? selectedCategory.name : ''}
               />
             </FormGroup>
             <FormGroup>
@@ -202,14 +324,53 @@ const Category = () => {
                 name="categoryDescription"
                 placeholder=""
                 type="text"
+                value={selectedCategory ? selectedCategory.description : ''}
               />
             </FormGroup>
+
+            <FormGroup>
+              <Label for="statusSwitch">Status</Label>
+              <CustomInput
+                type="switch"
+                id="statusSwitch"
+                name="statusSwitch"
+                label={statusSwitch ? "Active" : "InActive"}
+                onChange={() => setStatusSwitch(!statusSwitch)}
+                checked={selectedCategory ? selectedCategory.status : false}
+                
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="featureCategorySwitch">Feature Category</Label>
+              <CustomInput
+                type="switch"
+                id="featureCategorySwitch"
+                name="featureCategorySwitch"
+                label={featureCategorySwitch ? "Yes" : "No"}
+                onChange={(e) => setFeatureCategorySwitch(e.target.checked)}
+              
+                checked={featureCategorySwitch}
+              />
+              
+            </FormGroup>
+           <FormGroup>
+           {selectedCategory && (
+    <input type="hidden" id="categoryId" value={selectedCategory.categoryId} />
+  )}
+           </FormGroup>
           </Form>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={createCategory}>
-            Add
-          </Button>{" "}
+        {isEditMode ? (
+    <Button color="primary" onClick={updateCategory}>
+      Update
+    </Button>
+  ) : (
+    <Button color="primary" onClick={createCategory}>
+      Add
+    </Button>
+  )}
           <Button color="secondary" onClick={toggle}>
             Cancel
           </Button>

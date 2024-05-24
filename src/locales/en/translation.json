@@ -80,6 +80,7 @@
       "blank": "Blank",
       "Category": "Category",
       "Products": "Products",
+      "ProductTags": "ProductTags",
       "mainMenu": "Main Menu",
       "subMenu": "Sub Menu"
     }
