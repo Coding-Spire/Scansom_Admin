@@ -165,7 +165,7 @@ const Login = () => {
             </div>
           </form>
           <div className="social-auth-links text-center mt-2 mb-3">
-            <Button
+            {/* <Button
               className="mb-2"
               onClick={loginByFacebook}
               loading={isFacebookAuthLoading}
@@ -175,7 +175,7 @@ const Login = () => {
               {t('login.button.signIn.social', {
                 what: 'Facebook',
               })}
-            </Button>
+            </Button> */}
             <Button
               variant="danger"
               onClick={loginByGoogle}

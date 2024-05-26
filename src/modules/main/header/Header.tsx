@@ -57,9 +57,9 @@ const Header = () => {
         </li>
       </ul>
       <ul className="navbar-nav ml-auto">
-        <MessagesDropdown />
+        {/* <MessagesDropdown />
         <NotificationsDropdown />
-        <LanguagesDropdown />
+        <LanguagesDropdown /> */}
         <UserDropdown />
         <li className="nav-item">
           <button

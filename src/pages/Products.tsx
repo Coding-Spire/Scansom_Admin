@@ -1,12 +1,12 @@
 import { apiService } from '@app/services/apiService';
 import React, { useState, useEffect } from 'react';
-import { Button, CardHeader, ListGroup, ListGroupItem, Media } from 'reactstrap';
+import { Alert, Button, CardHeader, ListGroup, ListGroupItem, Media } from 'reactstrap';
 import { Spinner,CustomInput } from "reactstrap";
 import { Card, CardBody, Table } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
-
-
+import { Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input, FormFeedback  } from 'reactstrap';
+import { generateGUID } from '@app/utils/helpers';
 interface ProductImage {
   productImageId: string;
   productId: string;
@@ -19,15 +19,145 @@ interface Product {
   category: string;
   price: number;
   tag: string;
-  status: string | null;
+  status: boolean | null;
   tags: string[];
   images: ProductImage[];
+}
+
+interface Category {
+  name: string;
+  description: string;
+  categoryId: string;
+  status:boolean;
+  featureCategory: boolean;
+
 }
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const [createModal, setCreateModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+ 
+  //file upload
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("");
+  const [product, setProduct] = useState<Product>({
+    productId: generateGUID(),
+    name: '',
+    category: '',
+    price: 0,
+    tag: '',
+    status: true,
+    tags: [],
+    images: [],
+  });
+
+const toggle = () => setUpdateModal(!updateModal);
+
+const toggle1 = () => setCreateModal(!createModal);
+
+async function fetchCategories() {
+  try {
+    apiService({
+      method: "GET",
+      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
+    })
+      .then((response) => {
+        console.log(response.data); // Log the data
+        setCategories(response.data.data);
+         
+      })
+      .catch((error) => console.error(error));
+  } catch (error) {
+    // Handle error
+  }
+}
+function handleEdit(productId: string) {
+  // Implement your edit logic here
+  
+}
+
+function handleCreate() {
+  // Implement your create logic here
+  console.log(product);
+  apiService({
+    method: "POST",
+    url: "https://sacnsommasterdataservice.azurewebsites.net/api/Products",
+    data: product,
+  })
+    .then((response) => {
+      console.log(response.data); // Log the data
+      setAlertMessage("Product created successfully!");
+      setAlertColor("info");
+      toggle1(); // Close the modal
+      setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
+      setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
+    })
+    .catch((error) => {
+      console.error(error);
+      setAlertMessage("An error occurred while creating the category.");
+      setAlertColor("danger");
+    });
+}
+
+function handleDelete(productId: string) {
+  // Implement your delete logic here
+}
+
+function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  setSelectedFile(event.target.files ? event.target.files[0] : null);
+}
+
+function handleUploadImageServer(productId: string) {
+  // Implement your upload image logic here
+     setSelectedProduct(
+    products.find((product) => product.productId === productId) || null
+   
+  
+  );
+  console.log(selectedProduct);
+  const formData = new FormData();
+  if (selectedFile) {
+  formData.append('ImageFile', selectedFile);  }
+  formData.append('ProductId', selectedProduct?.productId || '');
+
+  apiService({
+    method: "POST",
+    url: "https://sacnsommasterdataservice.azurewebsites.net/api/ProductImages",
+    data: formData,
+  })
+    .then((response) => {
+      console.log(response.data); // Log the data
+      setAlertMessage("Image Uploaded  successfully!");
+      setAlertColor("info");
+      toggle(); // Close the modal
+      setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
+      setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
+    })
+    .catch((error) => {
+      console.error(error);
+      setAlertMessage("An error occurred while upload image.");
+      setAlertColor("danger");
+    });
+  
+}
+
+function handleUploadImage(productId: string) {
+  // Implement your upload image logic here
+  console.log(productId);
+  setUpdateModal(true);
+  setSelectedProduct(
+    products.find((product) => product.productId === productId) || null
+    
+  );
+
+}
   // Fetch products from your API
   useEffect(() => {
     setLoading(true); // Show the spinner
@@ -41,14 +171,40 @@ const Products = () => {
         setLoading(false); // Hide the spinner
       })
       .catch((error) => console.error(error));
+      fetchCategories();
   }, [refreshKey]);
 
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value, type, checked } = event.target;
+    setProduct(prevProduct => ({
+      ...prevProduct,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  }
+
   return (
+
+    <>
     <Card>
         <CardHeader>
-        <Button color="primary"  style={{ float: "right" }}>Create Product</Button>
+        {alertMessage && <Alert color={alertColor}>{alertMessage}</Alert>}
+        <Button color="primary"  style={{ float: "right" }}
+        onClick={() => setCreateModal(true)}
+        >Create Product</Button>
         </CardHeader>
       <CardBody>
+      {loading ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "50vh",
+                  }}
+                >
+                  <Spinner color="info">Loading...</Spinner>
+                </div>
+              ) : (
         <Table>
           <thead>
             <tr>
@@ -83,22 +239,64 @@ const Products = () => {
             ))}
           </tbody>
         </Table>
+              )}
       </CardBody>
     </Card>
+
+    <Modal isOpen={createModal} toggle={() => setCreateModal(!createModal)}>
+      <ModalHeader toggle={() => setCreateModal(!createModal)}>Create Product</ModalHeader>
+      <ModalBody>
+        <Form>
+        <FormGroup>
+      <Label for="name">Name</Label>
+      <Input type="text" name="name" id="name" value={product.name} onChange={handleChange} />
+    </FormGroup>
+    <FormGroup>
+  <Label for="category">Category</Label>
+  <CustomInput type="select" id="category" name="category" value={product.category} onChange={handleChange}>
+    <option value="">Select</option>
+    {categories.map((category, index) => (
+      <option key={index} value={category.name}>{category.name}</option>
+    ))}
+  </CustomInput>
+    </FormGroup>
+    <FormGroup>
+      <Label for="price">Price</Label>
+      <Input type="number" name="price" id="price" value={product.price} onChange={handleChange} />
+    </FormGroup>
+    <FormGroup>
+      <Label for="tag">Tag</Label>
+      <Input type="text" name="tag" id="tag" value={product.tag} onChange={handleChange} />
+    </FormGroup>
+    
+        </Form>
+      </ModalBody>
+      <ModalFooter>
+        <Button color="primary" onClick={handleCreate}>Create</Button>{' '}
+        <Button color="secondary" onClick={() => setCreateModal(false)}>Cancel</Button>
+      </ModalFooter>
+    </Modal>
+    <Modal isOpen={updateModal} toggle={() => setUpdateModal(!updateModal)}>
+      <ModalHeader toggle={() => setUpdateModal(!updateModal)}>Update Image</ModalHeader>
+      <ModalBody>
+        <Form>
+        <FormGroup>
+      <Label for="productImage">Product Image</Label>
+      <Input type="file" name="file" id="productImage" onChange={handleFileChange} />
+      {selectedFile && <FormFeedback>File selected: {selectedFile.name}</FormFeedback>}
+    </FormGroup>
+        </Form>
+      </ModalBody>
+      <ModalFooter>
+        <Button color="primary" onClick={() => handleUploadImageServer(selectedProduct?.productId || '')}>Update</Button>{' '}
+        <Button color="secondary" onClick={() => setUpdateModal(false)}>Cancel</Button>
+      </ModalFooter>
+    </Modal>
+
+    </>
   );
 };
 
 
-function handleEdit(productId: string) {
-    // Implement your edit logic here
-  }
-  
-  function handleDelete(productId: string) {
-    // Implement your delete logic here
-  }
-  
-  function handleUploadImage(productId: string) {
-    // Implement your upload image logic here
-  }
 
 export default Products;

@@ -21,6 +21,9 @@
   cursor: pointer;
 }
 
+#bmc-wbtn {
+  display: none !important;
+}
 
 #sidebar-overlay {
   background-color: rgba(0,0,0,.3);
