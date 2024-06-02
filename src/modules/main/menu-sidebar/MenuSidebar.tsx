@@ -14,11 +14,11 @@ export interface IMenuItem {
 }
 
 export const MENU: IMenuItem[] = [
-  {
-    name: i18n.t('menusidebar.label.dashboard'),
-    icon: 'fas fa-tachometer-alt nav-icon',
-    path: '/',
-  },
+  // {
+  //   name: i18n.t('menusidebar.label.dashboard'),
+  //   icon: 'fas fa-tachometer-alt nav-icon',
+  //   path: '/',
+  // },
   // {
   //   name: i18n.t('menusidebar.label.blank'),
   //   icon: 'fas fa-wrench nav-icon',
@@ -36,11 +36,11 @@ export const MENU: IMenuItem[] = [
     path: '/Products',
   },
 
-  {
-    name: i18n.t('menusidebar.label.ProductTags'),
-    icon: 'fas fa-tags nav-icon',
-    path: '/ProductTags',
-  },
+  // {
+  //   name: i18n.t('menusidebar.label.ProductTags'),
+  //   icon: 'fas fa-tags nav-icon',
+  //   path: '/ProductTags',
+  // },
   // {
   //   name: i18n.t('menusidebar.label.mainMenu'),
   //   icon: 'far fa-caret-square-down nav-icon',
