@@ -49,13 +49,20 @@ const Category = () => {
   const [alertColor, setAlertColor] = useState("");
   // State for controlling the visibility of the spinner
   const [loading, setLoading] = useState(true);
-
   const [statusSwitch, setStatusSwitch] = useState(false);
-const [featureCategorySwitch, setFeatureCategorySwitch] = useState(false);
-const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [featureCategorySwitch, setFeatureCategorySwitch] = useState(false);
 
-//to enable edit 
-const [isEditMode, setIsEditMode] = useState(false);
+
+  const [category, setCategory] = useState<Category>({
+    categoryId: generateGUID(),
+    name: '',
+    description: '',
+    status: true,
+    featureCategory: false,
+  });
+ 
+  //to enable edit 
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Function to toggle the modal
   const toggle = () => setModal(!modal);
@@ -75,37 +82,19 @@ const [isEditMode, setIsEditMode] = useState(false);
 
   // Function to update a category
   function updateCategory() {
-
-  const name = (document.getElementById("categoryName") as HTMLInputElement)
-      .value;
-    const description = (
-      document.getElementById("categoryDescription") as HTMLInputElement
-    ).value;
-    const status = (document.getElementById("statusSwitch") as HTMLInputElement)
-      .checked;
-    const featureCategory = (
-      document.getElementById("featureCategorySwitch") as HTMLInputElement
-    ).checked;
-    const categoryId = (document.getElementById("categoryId") as HTMLInputElement)
-      .value;
-
-    const newCategory: Category = {
-      categoryId: categoryId,
-      name: name,
-      description: description,
-      status: status,
-      featureCategory: featureCategory,
-    };
+ 
+ 
 
     apiService({
       method: "PUT",
       url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
-      data: newCategory,
+      data: category,
     })
       .then((response) => {
         console.log(response.data); // Log the data
         setAlertMessage("Category Updated successfully!");
         setAlertColor("info");
+       
         toggle(); // Close the modal
         setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
         setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
@@ -117,31 +106,28 @@ const [isEditMode, setIsEditMode] = useState(false);
       });
   }
 
+
+  function handleCreateNew() {
+    setCategory({
+      categoryId: generateGUID(),
+      name: '',
+      description: '',
+      status: true,
+      featureCategory: false,
+    });
+    setModal(true); // Open the modal
+  }
+
   // Function to create a category
   function createCategory() {
-    const name = (document.getElementById("categoryName") as HTMLInputElement)
-      .value;
-    const description = (
-      document.getElementById("categoryDescription") as HTMLInputElement
-    ).value;
-    const status = (document.getElementById("statusSwitch") as HTMLInputElement)
-      .checked;
-    const featureCategory = (
-      document.getElementById("featureCategorySwitch") as HTMLInputElement
-    ).checked;
+    
 
-    const newCategory: Category = {
-      categoryId: generateGUID(),
-      name: name,
-      description: description,
-      status: status,
-      featureCategory: featureCategory,
-    };
+    
 
     apiService({
       method: "POST",
       url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
-      data: newCategory,
+      data: category,
     })
       .then((response) => {
         console.log(response.data); // Log the data
@@ -201,7 +187,7 @@ const [isEditMode, setIsEditMode] = useState(false);
     const category = categories.find((category) => category.categoryId === categoryId);
     
     if (category) {
-      setSelectedCategory(category);
+      setCategory(category);
       console.log(category);
       setModal(true); // Open the modal
       setIsEditMode(true); // Enter edit mode
@@ -209,6 +195,11 @@ const [isEditMode, setIsEditMode] = useState(false);
       console.log(`Category with id ${categoryId} not found.`);
     }
   }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCategory({ ...category, [e.target.name]: e.target.value });
+    console.log(category);
+  };
 
   return (
     <div>
@@ -224,7 +215,7 @@ const [isEditMode, setIsEditMode] = useState(false);
                 outline
                 security="sm"
                 style={{ float: "right" }}
-                onClick={toggle}
+                onClick={handleCreateNew}
               >
                 Add New
               </Button>
@@ -308,37 +299,44 @@ const [isEditMode, setIsEditMode] = useState(false);
         <ModalBody>
           <Form>
             <FormGroup>
-              <Label for="exampleEmail">Category Name</Label>
+              <Label for="categoryName">Category Name</Label>
               <Input
-                id="categoryName"
-                name="categoryName"
+                id="name"
+                name="name"
                 placeholder="Name"
                 type="text"
-                value={selectedCategory ? selectedCategory.name : ''}
+                value={category.name}
+                onChange={handleChange}
+                 
               />
             </FormGroup>
             <FormGroup>
-              <Label for="exampleEmail">Category Description</Label>
+              <Label for="categoryDescription">Category Description</Label>
               <Input
-                id="categoryDescription"
-                name="categoryDescription"
+                id="description"
+                name="description"
                 placeholder=""
                 type="text"
-                value={selectedCategory ? selectedCategory.description : ''}
+                value={category.description}
+                onChange={handleChange}
               />
             </FormGroup>
 
             <FormGroup>
               <Label for="statusSwitch">Status</Label>
+             
               <CustomInput
                 type="switch"
                 id="statusSwitch"
                 name="statusSwitch"
                 label={statusSwitch ? "Active" : "InActive"}
-                onChange={() => setStatusSwitch(!statusSwitch)}
-                checked={selectedCategory ? selectedCategory.status : false}
-                
+                onChange={() => {
+                  setStatusSwitch(!statusSwitch);
+                  setCategory({ ...category, status: !statusSwitch });
+                }}
+                checked={statusSwitch}
               />
+               
             </FormGroup>
 
             <FormGroup>
@@ -348,15 +346,18 @@ const [isEditMode, setIsEditMode] = useState(false);
                 id="featureCategorySwitch"
                 name="featureCategorySwitch"
                 label={featureCategorySwitch ? "Yes" : "No"}
-                onChange={(e) => setFeatureCategorySwitch(e.target.checked)}
+                onChange={(e) => {
+                  setFeatureCategorySwitch(e.target.checked);
+                  setCategory({ ...category, featureCategory: !featureCategorySwitch });
+                }}
               
                 checked={featureCategorySwitch}
               />
               
             </FormGroup>
            <FormGroup>
-           {selectedCategory && (
-    <input type="hidden" id="categoryId" value={selectedCategory.categoryId} />
+           {category && (
+    <input type="hidden" id="categoryId" value={category.categoryId} />
   )}
            </FormGroup>
           </Form>
