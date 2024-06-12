@@ -4,7 +4,7 @@ import { Alert, Button, CardHeader, ListGroup, ListGroupItem, Media } from 'reac
 import { Spinner,CustomInput } from "reactstrap";
 import { Card, CardBody, Table } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faImage, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input, FormFeedback  } from 'reactstrap';
 import { generateGUID } from '@app/utils/helpers';
 interface ProductImage {
@@ -41,7 +41,7 @@ const Products = () => {
 
   const [createModal, setCreateModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
- 
+  const [isEditMode, setIsEditMode] = useState(false);
   //file upload
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -80,7 +80,18 @@ async function fetchCategories() {
 }
 function handleEdit(productId: string) {
   // Implement your edit logic here
-  
+  const selectedProduct: Product | undefined = products.find((product) => product.productId === productId);
+
+  if (selectedProduct) {
+    console.log(selectedProduct);
+    setProduct(selectedProduct);
+    setIsEditMode(true); // Enter edit mode
+    setCreateModal(true);
+    //toggle() ; // Open the modal
+    //setIsEditMode(true); // Enter edit mode
+  } else {
+    console.log(`Product with id ${productId} not found.`);
+  }
 }
 
 function handleCreate() {
@@ -108,6 +119,50 @@ function handleCreate() {
 
 function handleDelete(productId: string) {
   // Implement your delete logic here
+
+ 
+  
+  apiService({
+    method: "DELETE",
+    url: `https://sacnsommasterdataservice.azurewebsites.net/api/Products/${productId}`,
+  })
+    .then((response) => {
+      console.log(response.data); // Log the data
+      setAlertMessage("Product deleted successfully!");
+      setAlertColor("info");
+      setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
+      setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
+    })
+    .catch((error) => {
+      console.error(error);
+      setAlertMessage("An error occurred while deleting the Product.");
+      setAlertColor("danger");
+    });
+}
+
+function updateProduct() {
+ 
+ 
+
+  apiService({
+    method: "PUT",
+    url: "https://sacnsommasterdataservice.azurewebsites.net/api/Products",
+    data: product,
+  })
+    .then((response) => {
+      console.log(response.data); // Log the data
+      setAlertMessage("Product Updated successfully!");
+      setAlertColor("info");
+      toggle1(); // Close the modal
+      //toggle(); // Close the modal
+      setRefreshKey((oldKey) => oldKey + 1); // Trigger a refresh
+      setTimeout(() => setAlertMessage(""), 2000); // Clear the alert message after 2 seconds
+    })
+    .catch((error) => {
+      console.error(error);
+      setAlertMessage("An error occurred while creating the Product.");
+      setAlertColor("danger");
+    });
 }
 
 function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -183,116 +238,206 @@ function handleUploadImage(productId: string) {
   }
 
   return (
-
     <>
-    <Card>
+      <Card>
         <CardHeader>
-        {alertMessage && <Alert color={alertColor}>{alertMessage}</Alert>}
-        <Button color="primary"  style={{ float: "right" }}
-        onClick={() => setCreateModal(true)}
-        >Create Product</Button>
+          {alertMessage && <Alert color={alertColor}>{alertMessage}</Alert>}
+          <Button
+            color="primary"
+            style={{ float: "right" }}
+            onClick={() => setCreateModal(true)}
+          >
+            Create Product
+          </Button>
         </CardHeader>
-      <CardBody>
-      {loading ? (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "50vh",
-                  }}
-                >
-                  <Spinner color="info">Loading...</Spinner>
-                </div>
-              ) : (
-        <Table>
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Tag</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.productId}>
-                <td>
-                  {product.images[0] && (
-                    <img src={product.images[0].imageUrl} alt="Product" width="50" height="50" />
-                  )}
-                </td>
-                <td>{product.name}</td>
-                <td>{product.category}</td>
-                <td>${product.price}</td>
-                <td>{product.tag}</td>
-                <td>
-                <td>
-                <FontAwesomeIcon icon={faEdit}  style={{ color: "green", marginRight: "10px" }} onClick={() => handleEdit(product.productId)} /> | &nbsp;
-                <FontAwesomeIcon icon={faTrash}  style={{ color: "darkred", marginRight: "10px" }} onClick={() => handleDelete(product.productId)} /> | &nbsp;
-                <FontAwesomeIcon icon={faUpload}  style={{ color: "purple", marginRight: "10px" }} onClick={() => handleUploadImage(product.productId)} />
-              </td>
-              </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <CardBody>
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "50vh",
+              }}
+            >
+              <Spinner color="info">Loading...</Spinner>
+            </div>
+          ) : (
+            <Table>
+              <thead>
+                <tr>
+                  <th>Front Image</th>
+                  <th>Back Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Tag</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product.productId}>
+                    {product.images[0] && (
+                      <td>
+                        <img
+                          src={product.images[0].imageUrl}
+                          alt="Product Front"
+                          width="50"
+                          height="50"
+                        />
+                      </td>
+                    )}
+                    <td>
+                      {product.images[1] ? (
+                        <img
+                          src={product.images[1].imageUrl}
+                          alt="Product Back"
+                          width="50"
+                          height="50"
+                        />
+                      ) : (
+                        <FontAwesomeIcon icon={faImage} />
+                      )}
+                    </td>
+                    <td>{product.name}</td>
+                    <td>{product.category}</td>
+                    <td>${product.price}</td>
+                    <td>{product.tag}</td>
+                    <td>
+                      <td>
+                        <FontAwesomeIcon
+                          icon={faEdit}
+                          style={{ color: "green", marginRight: "10px" }}
+                          onClick={() => handleEdit(product.productId)}
+                        />{" "}
+                        | &nbsp;
+                        <FontAwesomeIcon
+                          icon={faTrash}
+                          style={{ color: "darkred", marginRight: "10px" }}
+                          onClick={() => handleDelete(product.productId)}
+                        />{" "}
+                        | &nbsp;
+                        <FontAwesomeIcon
+                          icon={faUpload}
+                          style={{ color: "purple", marginRight: "10px" }}
+                          onClick={() => handleUploadImage(product.productId)}
+                        />
+                      </td>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </CardBody>
+      </Card>
+
+      <Modal isOpen={createModal} toggle={() => setCreateModal(!createModal)}>
+        <ModalHeader toggle={() => setCreateModal(!createModal)}>
+          Create Product
+        </ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="name">Name</Label>
+              <Input
+                type="text"
+                name="name"
+                id="name"
+                value={product.name}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="category">Category</Label>
+              <CustomInput
+                type="select"
+                id="category"
+                name="category"
+                value={product.category}
+                onChange={handleChange}
+              >
+                <option value="">Select</option>
+                {categories.map((category, index) => (
+                  <option key={index} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+              </CustomInput>
+            </FormGroup>
+            <FormGroup>
+              <Label for="price">Price</Label>
+              <Input
+                type="number"
+                name="price"
+                id="price"
+                value={product.price}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="tag">Tag</Label>
+              <Input
+                type="text"
+                name="tag"
+                id="tag"
+                value={product.tag}
+                onChange={handleChange}
+              />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          {isEditMode ? (
+            <Button color="primary" onClick={updateProduct}>
+              Update
+            </Button>
+          ) : (
+            <Button color="primary" onClick={handleCreate}>
+              Add
+            </Button>
+          )}
+          {/* <Button color="primary" onClick={handleCreate}>Create</Button>{' '} */}
+          <Button color="secondary" onClick={() => setCreateModal(false)}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+      <Modal isOpen={updateModal} toggle={() => setUpdateModal(!updateModal)}>
+        <ModalHeader toggle={() => setUpdateModal(!updateModal)}>
+          Update Image
+        </ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="productImage">Product Image</Label>
+              <Input
+                type="file"
+                name="file"
+                id="productImage"
+                onChange={handleFileChange}
+              />
+              {selectedFile && (
+                <FormFeedback>File selected: {selectedFile.name}</FormFeedback>
               )}
-      </CardBody>
-    </Card>
-
-    <Modal isOpen={createModal} toggle={() => setCreateModal(!createModal)}>
-      <ModalHeader toggle={() => setCreateModal(!createModal)}>Create Product</ModalHeader>
-      <ModalBody>
-        <Form>
-        <FormGroup>
-      <Label for="name">Name</Label>
-      <Input type="text" name="name" id="name" value={product.name} onChange={handleChange} />
-    </FormGroup>
-    <FormGroup>
-  <Label for="category">Category</Label>
-  <CustomInput type="select" id="category" name="category" value={product.category} onChange={handleChange}>
-    <option value="">Select</option>
-    {categories.map((category, index) => (
-      <option key={index} value={category.name}>{category.name}</option>
-    ))}
-  </CustomInput>
-    </FormGroup>
-    <FormGroup>
-      <Label for="price">Price</Label>
-      <Input type="number" name="price" id="price" value={product.price} onChange={handleChange} />
-    </FormGroup>
-    <FormGroup>
-      <Label for="tag">Tag</Label>
-      <Input type="text" name="tag" id="tag" value={product.tag} onChange={handleChange} />
-    </FormGroup>
-    
-        </Form>
-      </ModalBody>
-      <ModalFooter>
-        <Button color="primary" onClick={handleCreate}>Create</Button>{' '}
-        <Button color="secondary" onClick={() => setCreateModal(false)}>Cancel</Button>
-      </ModalFooter>
-    </Modal>
-    <Modal isOpen={updateModal} toggle={() => setUpdateModal(!updateModal)}>
-      <ModalHeader toggle={() => setUpdateModal(!updateModal)}>Update Image</ModalHeader>
-      <ModalBody>
-        <Form>
-        <FormGroup>
-      <Label for="productImage">Product Image</Label>
-      <Input type="file" name="file" id="productImage" onChange={handleFileChange} />
-      {selectedFile && <FormFeedback>File selected: {selectedFile.name}</FormFeedback>}
-    </FormGroup>
-        </Form>
-      </ModalBody>
-      <ModalFooter>
-        <Button color="primary" onClick={() => handleUploadImageServer(selectedProduct?.productId || '')}>Update</Button>{' '}
-        <Button color="secondary" onClick={() => setUpdateModal(false)}>Cancel</Button>
-      </ModalFooter>
-    </Modal>
-
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="primary"
+            onClick={() =>
+              handleUploadImageServer(selectedProduct?.productId || "")
+            }
+          >
+            Update
+          </Button>{" "}
+          <Button color="secondary" onClick={() => setUpdateModal(false)}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };
