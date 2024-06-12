@@ -94,9 +94,24 @@ function handleEdit(productId: string) {
   }
 }
 
+function handleCreateNew() {
+  setProduct({
+  productId: generateGUID(),
+  name: "",
+  category: "",
+  price: 0,
+  tag: "",
+  status: true,
+  tags: [],
+  images: [],
+});
+setCreateModal(true);
+}
+
 function handleCreate() {
   // Implement your create logic here
   console.log(product);
+ 
   apiService({
     method: "POST",
     url: "https://sacnsommasterdataservice.azurewebsites.net/api/Products",
@@ -245,7 +260,7 @@ function handleUploadImage(productId: string) {
           <Button
             color="primary"
             style={{ float: "right" }}
-            onClick={() => setCreateModal(true)}
+            onClick={handleCreateNew}
           >
             Create Product
           </Button>
