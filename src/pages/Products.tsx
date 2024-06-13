@@ -7,12 +7,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faImage, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input, FormFeedback  } from 'reactstrap';
 import { generateGUID } from '@app/utils/helpers';
+import Paginate from 'react-paginate';
+import { Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 interface ProductImage {
   productImageId: string;
   productId: string;
   imageUrl: string;
 }
 
+const ITEMS_PER_PAGE = 10;
 interface Product {
   productId: string;
   name: string;
@@ -42,6 +45,22 @@ const Products = () => {
   const [createModal, setCreateModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+   // Add state for pagination
+   const [currentPage, setCurrentPage] = useState(0);
+
+   // Calculate the range of items for the current page
+   const offset = currentPage * ITEMS_PER_PAGE;
+ 
+   // Slice the products array to get only the items for the current page
+   const productsOnPage = products.slice(offset, offset + ITEMS_PER_PAGE);
+ 
+   // Calculate the total number of pages
+   const pageCount = Math.ceil(products.length / ITEMS_PER_PAGE);
+ 
+   const handlePageClick = (pageNumber: React.SetStateAction<number>) => {
+    setCurrentPage(pageNumber);
+  }
   //file upload
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -278,6 +297,7 @@ function handleUploadImage(productId: string) {
               <Spinner color="info">Loading...</Spinner>
             </div>
           ) : (
+            <div>
             <Table>
               <thead>
                 <tr>
@@ -291,16 +311,20 @@ function handleUploadImage(productId: string) {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
+                {productsOnPage.map((product) => (
                   <tr key={product.productId}>
                     {product.images[0] && (
                       <td>
+                        {product.images[0] ? (
                         <img
                           src={product.images[0].imageUrl}
-                          alt="Product Front"
+                          alt="Product Back"
                           width="50"
                           height="50"
                         />
+                      ) : (
+                        <FontAwesomeIcon icon={faImage} />
+                      )}
                       </td>
                     )}
                     <td>
@@ -344,6 +368,22 @@ function handleUploadImage(productId: string) {
                 ))}
               </tbody>
             </Table>
+            <Pagination>
+        <PaginationItem disabled={currentPage <= 0}>
+          <PaginationLink previous onClick={() => handlePageClick(currentPage - 1)} />
+        </PaginationItem>
+        {Array.from({ length: pageCount }, (_, i) => (
+          <PaginationItem active={i === currentPage} key={i}>
+            <PaginationLink onClick={() => handlePageClick(i)}>
+              {i + 1}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+        <PaginationItem disabled={currentPage >= pageCount - 1}>
+          <PaginationLink next onClick={() => handlePageClick(currentPage + 1)} />
+        </PaginationItem>
+      </Pagination>
+          </div>
           )}
         </CardBody>
       </Card>

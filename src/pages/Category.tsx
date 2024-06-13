@@ -30,6 +30,7 @@ import {
 } from "reactstrap";
 
 import { Spinner,CustomInput } from "reactstrap";
+import { Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 // Define the data structure
 interface Category {
   name: string;
@@ -39,6 +40,8 @@ interface Category {
   featureCategory: boolean;
 
 }
+
+const ITEMS_PER_PAGE = 10;
 
 const Category = () => {
   // State variables
@@ -51,6 +54,22 @@ const Category = () => {
   const [loading, setLoading] = useState(true);
   const [statusSwitch, setStatusSwitch] = useState(false);
   const [featureCategorySwitch, setFeatureCategorySwitch] = useState(false);
+
+   // Add state for pagination
+   const [currentPage, setCurrentPage] = useState(0);
+
+   // Calculate the range of items for the current page
+   const offset = currentPage * ITEMS_PER_PAGE;
+ 
+   // Slice the products array to get only the items for the current page
+   const productsOnPage = categories.slice(offset, offset + ITEMS_PER_PAGE);
+ 
+   // Calculate the total number of pages
+   const pageCount = Math.ceil(categories.length / ITEMS_PER_PAGE);
+ 
+   const handlePageClick = (pageNumber: React.SetStateAction<number>) => {
+    setCurrentPage(pageNumber);
+  }
 
 
   const [category, setCategory] = useState<Category>({
@@ -234,6 +253,7 @@ const Category = () => {
                   <Spinner color="info">Loading...</Spinner>
                 </div>
               ) : (
+                <div>
                 <Table responsive>
                   <thead>
                     <tr>
@@ -245,7 +265,7 @@ const Category = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {categories.map((category, index) => (
+                    {productsOnPage.map((category, index) => (
                       <tr key={index}>
                         <td>{category.name}</td>
                         <td>{category.description}</td>
@@ -288,6 +308,22 @@ const Category = () => {
                     ))}
                   </tbody>
                 </Table>
+                <Pagination>
+                <PaginationItem disabled={currentPage <= 0}>
+                  <PaginationLink previous onClick={() => handlePageClick(currentPage - 1)} />
+                </PaginationItem>
+                {Array.from({ length: pageCount }, (_, i) => (
+                  <PaginationItem active={i === currentPage} key={i}>
+                    <PaginationLink onClick={() => handlePageClick(i)}>
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem disabled={currentPage >= pageCount - 1}>
+                  <PaginationLink next onClick={() => handlePageClick(currentPage + 1)} />
+                </PaginationItem>
+              </Pagination>
+              </div>
               )}
             </CardBody>
           </Card>
