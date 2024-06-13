@@ -313,20 +313,18 @@ function handleUploadImage(productId: string) {
               <tbody>
                 {productsOnPage.map((product) => (
                   <tr key={product.productId}>
-                    {product.images[0] && (
-                      <td>
-                        {product.images[0] ? (
+                   <td>
+                      {product.images[0] ? (
                         <img
                           src={product.images[0].imageUrl}
-                          alt="Product Back"
+                          alt="Product Front"
                           width="50"
                           height="50"
                         />
                       ) : (
                         <FontAwesomeIcon icon={faImage} />
                       )}
-                      </td>
-                    )}
+                    </td>
                     <td>
                       {product.images[1] ? (
                         <img
