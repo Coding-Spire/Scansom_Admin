@@ -1,6 +1,6 @@
 import { apiService } from '@app/services/apiService';
 import React, { useState, useEffect } from 'react';
-import { Alert, Button, CardHeader, ListGroup, ListGroupItem, Media } from 'reactstrap';
+import { Alert, Button, CardHeader, CardTitle, ListGroup, ListGroupItem, Media } from 'reactstrap';
 import { Spinner,CustomInput } from "reactstrap";
 import { Card, CardBody, Table } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -276,6 +276,7 @@ function handleUploadImage(productId: string) {
       <Card>
         <CardHeader>
           {alertMessage && <Alert color={alertColor}>{alertMessage}</Alert>}
+          <CardTitle>Product Master</CardTitle>
           <Button
             color="primary"
             style={{ float: "right" }}
@@ -283,6 +284,7 @@ function handleUploadImage(productId: string) {
           >
             Create Product
           </Button>
+
         </CardHeader>
         <CardBody>
           {loading ? (
