@@ -85,7 +85,7 @@ async function fetchCategories() {
   try {
     apiService({
       method: "GET",
-      url: "https://scansommdataservice.azurewebsites.net/api/Category",
+      url: "https://scansomedataservice.azurewebsites.net/api/Category",
     })
       .then((response) => {
         console.log(response.data); // Log the data
@@ -133,7 +133,7 @@ function handleCreate() {
  
   apiService({
     method: "POST",
-    url: "https://scansommdataservice.azurewebsites.net/api/Products",
+    url: "https://scansomedataservice.azurewebsites.net/api/Products",
     data: product,
   })
     .then((response) => {
@@ -158,7 +158,7 @@ function handleDelete(productId: string) {
   
   apiService({
     method: "DELETE",
-    url: `https://scansommdataservice.azurewebsites.net/api/Products/${productId}`,
+    url: `https://scansomedataservice.azurewebsites.net/api/Products/${productId}`,
   })
     .then((response) => {
       console.log(response.data); // Log the data
@@ -180,7 +180,7 @@ function updateProduct() {
 
   apiService({
     method: "PUT",
-    url: "https://scansommdataservice.azurewebsites.net/api/Products",
+    url: "https://scansomedataservice.azurewebsites.net/api/Products",
     data: product,
   })
     .then((response) => {
@@ -218,7 +218,7 @@ function handleUploadImageServer(productId: string) {
 
   apiService({
     method: "POST",
-    url: "https://scansommdataservice.azurewebsites.net/api/ProductImages",
+    url: "https://scansomedataservice.azurewebsites.net/api/ProductImages",
     data: formData,
   })
     .then((response) => {
@@ -252,7 +252,7 @@ function handleUploadImage(productId: string) {
     setLoading(true); // Show the spinner
     apiService({
       method: "GET",
-      url: "https://scansommdataservice.azurewebsites.net/api/Products/GetAll",
+      url: "https://scansomedataservice.azurewebsites.net/api/Products/GetAll",
     })
       .then((response) => {
         console.log(response.data); // Log the data
