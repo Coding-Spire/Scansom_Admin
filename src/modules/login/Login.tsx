@@ -87,7 +87,7 @@ const Login = () => {
         <div className="card-header text-center">
           <Link to="/" className="h1">
             <b>Admin</b>
-            <span>LTE</span>
+            <span>Scansom</span>
           </Link>
         </div>
         <div className="card-body">
