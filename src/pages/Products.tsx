@@ -133,7 +133,7 @@ function handleCreate() {
  
   apiService({
     method: "POST",
-    url: "https://sacnsommasterdataservice.azurewebsites.net/api/Products",
+    url: "https://scansommdataservice.azurewebsites.net/api/Products",
     data: product,
   })
     .then((response) => {
@@ -158,7 +158,7 @@ function handleDelete(productId: string) {
   
   apiService({
     method: "DELETE",
-    url: `https://sacnsommasterdataservice.azurewebsites.net/api/Products/${productId}`,
+    url: `https://scansommdataservice.azurewebsites.net/api/Products/${productId}`,
   })
     .then((response) => {
       console.log(response.data); // Log the data
@@ -180,7 +180,7 @@ function updateProduct() {
 
   apiService({
     method: "PUT",
-    url: "https://sacnsommasterdataservice.azurewebsites.net/api/Products",
+    url: "https://scansommdataservice.azurewebsites.net/api/Products",
     data: product,
   })
     .then((response) => {
@@ -218,7 +218,7 @@ function handleUploadImageServer(productId: string) {
 
   apiService({
     method: "POST",
-    url: "https://sacnsommasterdataservice.azurewebsites.net/api/ProductImages",
+    url: "https://scansommdataservice.azurewebsites.net/api/ProductImages",
     data: formData,
   })
     .then((response) => {
@@ -252,7 +252,7 @@ function handleUploadImage(productId: string) {
     setLoading(true); // Show the spinner
     apiService({
       method: "GET",
-      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Products/GetAll",
+      url: "https://scansommdataservice.azurewebsites.net/api/Products/GetAll",
     })
       .then((response) => {
         console.log(response.data); // Log the data

@@ -106,7 +106,7 @@ const Category = () => {
 
     apiService({
       method: "PUT",
-      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
+      url: "https://scansommdataservice.azurewebsites.net/api/Category",
       data: category,
     })
       .then((response) => {
@@ -145,7 +145,7 @@ const Category = () => {
 
     apiService({
       method: "POST",
-      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
+      url: "https://scansommdataservice.azurewebsites.net/api/Category",
       data: category,
     })
       .then((response) => {
@@ -168,7 +168,7 @@ const Category = () => {
     setLoading(true); // Show the spinner
     apiService({
       method: "GET",
-      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
+      url: "https://scansommdataservice.azurewebsites.net/api/Category",
     })
       .then((response) => {
         console.log(response.data); // Log the data
@@ -184,7 +184,7 @@ const Category = () => {
     console.log(categoryId);
     apiService({
       method: "DELETE",
-      url: `https://sacnsommasterdataservice.azurewebsites.net/api/Category/${categoryId}`,
+      url: `https://scansommdataservice.azurewebsites.net/api/Category/${categoryId}`,
     })
       .then((response) => {
         console.log(response.data); // Log the data
