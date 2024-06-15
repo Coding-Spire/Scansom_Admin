@@ -85,7 +85,7 @@ async function fetchCategories() {
   try {
     apiService({
       method: "GET",
-      url: "https://sacnsommasterdataservice.azurewebsites.net/api/Category",
+      url: "https://scansommdataservice.azurewebsites.net/api/Category",
     })
       .then((response) => {
         console.log(response.data); // Log the data
