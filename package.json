@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "start": "node server.js",
     "preview": "vite preview",
     "format": "prettier-eslint $PWD/'src/**/*.{js,json}' --write",
     "lint": "eslint src/**/*.js",
@@ -44,6 +45,7 @@
     "axios": "^1.7.2",
     "bootstrap": "^4.5.2",
     "classnames": "^2.2.6",
+    "express": "^4.19.2",
     "firebase": "10.11.1",
     "formik": "2.4.6",
     "i18next": "23.11.4",
